@@ -37,8 +37,6 @@
       metricIncome: document.getElementById("metricIncome"),
       metricExpense: document.getElementById("metricExpense"),
       metricTotalBalance: document.getElementById("metricTotalBalance"),
-      metricCash: document.getElementById("metricCash"),
-      metricUpi: document.getElementById("metricUpi"),
       installAppBtn: document.getElementById("installAppBtn"),
 
       expenseForm: document.getElementById("expenseForm"),
@@ -66,12 +64,8 @@
       clearReportFilterBtn: document.getElementById("clearReportFilterBtn"),
       reportTableBody: document.getElementById("reportTableBody"),
       reportEmpty: document.getElementById("reportEmpty"),
-      totalExpenseCash: document.getElementById("totalExpenseCash"),
-      totalExpenseUpi: document.getElementById("totalExpenseUpi"),
-      totalIncomeCash: document.getElementById("totalIncomeCash"),
-      totalIncomeUpi: document.getElementById("totalIncomeUpi"),
-      totalCashBalance: document.getElementById("totalCashBalance"),
-      totalUpiBalance: document.getElementById("totalUpiBalance"),
+      totalExpense: document.getElementById("totalExpense"),
+      totalIncome: document.getElementById("totalIncome"),
       totalBalance: document.getElementById("totalBalance"),
       categoryBreakdown: document.getElementById("categoryBreakdown"),
       voucherReportBody: document.getElementById("voucherReportBody"),
@@ -243,7 +237,6 @@
 
     const date = els.expenseDate.value;
     const voucher = editingExpenseId ? els.voucherNumber.value.trim() : generateVoucherNumber(date);
-    const paidBy = getCheckedValue("expensePaidBy");
     const items = readExpenseLines();
 
     if (!date) {
@@ -266,22 +259,21 @@
       if (existing) {
         existing.date = date;
         existing.voucher = voucher;
-        existing.paidBy = paidBy;
         existing.items = items;
         existing.updatedAt = new Date().toISOString();
       }
-      showToast("Voucher updated.");
+      showToast("Expense updated.");
     } else {
       state.expenses.push({
         id: makeId("exp"),
         date,
         voucher,
-        paidBy,
+        paidBy: "cash",
         items,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       });
-      showToast("Voucher saved.");
+      showToast("Expense saved.");
     }
 
     persist();
@@ -309,7 +301,7 @@
     refreshGeneratedVoucherNumber();
     els.expenseLines.innerHTML = "";
     addExpenseLine();
-    els.saveExpenseBtn.textContent = "Save voucher";
+    els.saveExpenseBtn.textContent = "Save expense";
   }
 
   function editExpense(id) {
@@ -319,12 +311,11 @@
     editingExpenseId = id;
     els.expenseDate.value = expense.date;
     els.voucherNumber.value = expense.voucher;
-    setCheckedValue("expensePaidBy", expense.paidBy);
     els.expenseLines.innerHTML = "";
     expense.items.forEach((item) => addExpenseLine(item));
-    els.saveExpenseBtn.textContent = "Update voucher";
+    els.saveExpenseBtn.textContent = "Update expense";
     switchTab("expense");
-    showToast("Voucher ready for editing.");
+    showToast("Expense ready for editing.");
   }
 
   function refreshGeneratedVoucherNumber() {
@@ -468,8 +459,6 @@
     els.metricIncome.textContent = money(totalIncome(totals));
     els.metricExpense.textContent = money(totalExpense(totals));
     els.metricTotalBalance.textContent = money(totalBalance(totals));
-    els.metricCash.textContent = money(cashBalance(totals));
-    els.metricUpi.textContent = money(upiBalance(totals));
   }
 
   function renderExpenseTable() {
@@ -482,7 +471,6 @@
       row.append(
         td(formatDate(expense.date)),
         td(expense.voucher),
-        td(paidPill(expense.paidBy)),
         expenseItemsCell(expense.items),
         td(money(sumItems(expense.items)), "number"),
         actionCell([
@@ -526,23 +514,15 @@
       const row = document.createElement("tr");
       row.append(
         td(formatDate(entry.date)),
-        td(money(entry.expenseCash), "number"),
-        td(money(entry.expenseUpi), "number"),
-        td(money(entry.incomeCash), "number"),
-        td(money(entry.incomeUpi), "number"),
-        td(money(entry.cashBalance), "number"),
-        td(money(entry.upiBalance), "number"),
+        td(money(entry.totalExpense), "number"),
+        td(money(entry.totalIncome), "number"),
         td(money(entry.totalBalance), "number")
       );
       els.reportTableBody.appendChild(row);
     });
 
-    els.totalExpenseCash.textContent = money(report.totals.expenseCash);
-    els.totalExpenseUpi.textContent = money(report.totals.expenseUpi);
-    els.totalIncomeCash.textContent = money(report.totals.incomeCash);
-    els.totalIncomeUpi.textContent = money(report.totals.incomeUpi);
-    els.totalCashBalance.textContent = money(cashBalance(report.totals));
-    els.totalUpiBalance.textContent = money(upiBalance(report.totals));
+    els.totalExpense.textContent = money(totalExpense(report.totals));
+    els.totalIncome.textContent = money(totalIncome(report.totals));
     els.totalBalance.textContent = money(totalBalance(report.totals));
 
     renderCategoryBreakdown(report.categoryTotals);
@@ -595,8 +575,7 @@
         td(formatDate(entry.date)),
         td(entry.voucher),
         td(categoryLabels[entry.category] || entry.category),
-        td(money(entry.amount), "number"),
-        td(paidPill(entry.paidBy))
+        td(money(entry.amount), "number")
       );
       els.voucherReportBody.appendChild(row);
     });
@@ -604,7 +583,7 @@
     if (!rows.length) {
       const row = document.createElement("tr");
       const cell = td("No expense details found.");
-      cell.colSpan = 5;
+      cell.colSpan = 4;
       row.appendChild(cell);
       els.voucherReportBody.appendChild(row);
     }
@@ -623,8 +602,10 @@
           date,
           expenseCash: 0,
           expenseUpi: 0,
+          totalExpense: 0,
           incomeCash: 0,
-          incomeUpi: 0
+          incomeUpi: 0,
+          totalIncome: 0
         });
       }
       return byDate.get(date);
@@ -633,6 +614,7 @@
     expenseRows.forEach((expense) => {
       const dateRow = ensureDate(expense.date);
       const total = sumItems(expense.items);
+      dateRow.totalExpense += total;
       if (expense.paidBy === "upi") {
         dateRow.expenseUpi += total;
       } else {
@@ -655,6 +637,7 @@
       const dateRow = ensureDate(income.date);
       dateRow.incomeCash += income.cash || 0;
       dateRow.incomeUpi += income.upi || 0;
+      dateRow.totalIncome += (income.cash || 0) + (income.upi || 0);
     });
 
     const dateRows = Array.from(byDate.values())
@@ -662,11 +645,13 @@
         ...entry,
         expenseCash: roundMoney(entry.expenseCash),
         expenseUpi: roundMoney(entry.expenseUpi),
+        totalExpense: roundMoney(entry.totalExpense),
         incomeCash: roundMoney(entry.incomeCash),
         incomeUpi: roundMoney(entry.incomeUpi),
+        totalIncome: roundMoney(entry.totalIncome),
         cashBalance: roundMoney(entry.incomeCash - entry.expenseCash),
         upiBalance: roundMoney(entry.incomeUpi - entry.expenseUpi),
-        totalBalance: roundMoney(entry.incomeCash + entry.incomeUpi - entry.expenseCash - entry.expenseUpi)
+        totalBalance: roundMoney(entry.totalIncome - entry.totalExpense)
       }))
       .sort((a, b) => a.date.localeCompare(b.date));
 
@@ -747,34 +732,22 @@
     lines.push(["Date wise totals"]);
     lines.push([
       "Date",
-      "Expense Cash",
-      "Expense UPI",
-      "Income Cash",
-      "Income UPI",
-      "Cash Balance",
-      "UPI Balance",
+      "Total Expense",
+      "Total Income",
       "Total Balance"
     ]);
     report.dateRows.forEach((entry) => {
       lines.push([
         entry.date,
-        entry.expenseCash,
-        entry.expenseUpi,
-        entry.incomeCash,
-        entry.incomeUpi,
-        entry.cashBalance,
-        entry.upiBalance,
+        entry.totalExpense,
+        entry.totalIncome,
         entry.totalBalance
       ]);
     });
     lines.push([
       "Total",
-      report.totals.expenseCash,
-      report.totals.expenseUpi,
-      report.totals.incomeCash,
-      report.totals.incomeUpi,
-      cashBalance(report.totals),
-      upiBalance(report.totals),
+      totalExpense(report.totals),
+      totalIncome(report.totals),
       totalBalance(report.totals)
     ]);
 
@@ -787,14 +760,13 @@
 
     lines.push([]);
     lines.push(["Expense detail"]);
-    lines.push(["Date", "Voucher", "Category", "Amount", "Paid by"]);
+    lines.push(["Date", "Voucher", "Category", "Amount"]);
     report.voucherRows.forEach((entry) => {
       lines.push([
         entry.date,
         entry.voucher,
         categoryLabels[entry.category] || entry.category,
-        entry.amount,
-        entry.paidBy.toUpperCase()
+        entry.amount
       ]);
     });
 

@@ -47,14 +47,6 @@
           <span>Total Balance</span>
           <strong id="metricTotalBalance">Rs. 0.00</strong>
         </div>
-        <div class="metric">
-          <span>Cash Balance</span>
-          <strong id="metricCash">Rs. 0.00</strong>
-        </div>
-        <div class="metric">
-          <span>UPI Balance</span>
-          <strong id="metricUpi">Rs. 0.00</strong>
-        </div>
       </section>
 
       <section id="expense" class="view is-active" aria-labelledby="expenseTitle">
@@ -63,7 +55,7 @@
             <div class="panel-heading">
               <div>
                 <p class="eyebrow">Expense entry</p>
-                <h2 id="expenseTitle">Voucher details</h2>
+                <h2 id="expenseTitle">Expense details</h2>
               </div>
               <button class="ghost-button" id="resetExpenseBtn" type="button">Clear</button>
             </div>
@@ -78,18 +70,6 @@
                 <input id="voucherNumber" type="text" placeholder="Auto generated" required readonly />
               </label>
             </div>
-
-            <fieldset class="segmented-field">
-              <legend>Paid by</legend>
-              <label>
-                <input type="radio" name="expensePaidBy" value="cash" checked />
-                <span>Cash</span>
-              </label>
-              <label>
-                <input type="radio" name="expensePaidBy" value="upi" />
-                <span>UPI</span>
-              </label>
-            </fieldset>
 
             <div class="line-table-wrap">
               <div class="line-table-head">
@@ -106,7 +86,7 @@
                 <span class="button-mark">+</span>
                 Add line
               </button>
-              <button class="primary-button" id="saveExpenseBtn" type="submit">Save voucher</button>
+              <button class="primary-button" id="saveExpenseBtn" type="submit">Save expense</button>
             </div>
           </form>
 
@@ -114,7 +94,7 @@
             <div class="panel-heading">
               <div>
                 <p class="eyebrow">Expense register</p>
-                <h2 id="voucherListTitle">Saved vouchers</h2>
+                <h2 id="voucherListTitle">Saved expenses</h2>
               </div>
             </div>
             <div class="table-scroll">
@@ -123,7 +103,6 @@
                   <tr>
                     <th>Date</th>
                     <th>Voucher</th>
-                    <th>Paid by</th>
                     <th>Items</th>
                     <th class="number">Total</th>
                     <th class="actions-col">Action</th>
@@ -228,12 +207,8 @@
               <thead>
                 <tr>
                   <th>Date</th>
-                  <th class="number">Expense Cash</th>
-                  <th class="number">Expense UPI</th>
-                  <th class="number">Income Cash</th>
-                  <th class="number">Income UPI</th>
-                  <th class="number">Cash Balance</th>
-                  <th class="number">UPI Balance</th>
+                  <th class="number">Total Expense</th>
+                  <th class="number">Total Income</th>
                   <th class="number">Total Balance</th>
                 </tr>
               </thead>
@@ -241,12 +216,8 @@
               <tfoot>
                 <tr>
                   <th>Total</th>
-                  <th class="number" id="totalExpenseCash">Rs. 0.00</th>
-                  <th class="number" id="totalExpenseUpi">Rs. 0.00</th>
-                  <th class="number" id="totalIncomeCash">Rs. 0.00</th>
-                  <th class="number" id="totalIncomeUpi">Rs. 0.00</th>
-                  <th class="number" id="totalCashBalance">Rs. 0.00</th>
-                  <th class="number" id="totalUpiBalance">Rs. 0.00</th>
+                  <th class="number" id="totalExpense">Rs. 0.00</th>
+                  <th class="number" id="totalIncome">Rs. 0.00</th>
                   <th class="number" id="totalBalance">Rs. 0.00</th>
                 </tr>
               </tfoot>
@@ -281,7 +252,6 @@
                     <th>Voucher</th>
                     <th>Category</th>
                     <th class="number">Amount</th>
-                    <th>Paid by</th>
                   </tr>
                 </thead>
                 <tbody id="voucherReportBody"></tbody>

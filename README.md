@@ -20,10 +20,10 @@ Each phone stores its own data in that browser/app install. Use the Backup tab t
 
 ## What it does
 
-- Expense tab: add a voucher with one date, one voucher number, cash or UPI payment mode, and multiple expense lines.
+- Expense tab: add one date, an automatically generated voucher number, and multiple expense lines.
 - Expense vouchers are generated automatically in the format `FV-YYYYMMDD-001`.
 - Income tab: save daily cash received and UPI received.
-- Report tab: view date wise cash and UPI expenses, cash and UPI income, cash balance, UPI balance, and total balance after subtracting all expenses from all income.
+- Report tab: view date wise total expense, total income, and total balance after subtracting all expenses from all income.
 - Backup tab: save a backup email ID, download a JSON backup, generate an email message file, open an email draft, and import a backup.
 
 ## Storage and email backup
