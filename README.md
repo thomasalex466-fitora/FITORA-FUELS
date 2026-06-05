@@ -9,6 +9,7 @@ Open `index.html` in a browser. No installation is required.
 ## Install on Android and iPhone
 
 This app is now set up as a Progressive Web App with the Fitora logo as its mobile icon.
+The screens are responsive for mobile use, with forms stacked vertically and report/register tables shown as readable phone-friendly rows.
 
 To install on mobile, the app must be opened from an HTTPS website. A local `file://` link works for desktop testing, but mobile browsers will not install it as an app from `file://`.
 

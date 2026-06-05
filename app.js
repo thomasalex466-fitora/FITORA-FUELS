@@ -469,14 +469,14 @@
     rows.forEach((expense) => {
       const row = document.createElement("tr");
       row.append(
-        td(formatDate(expense.date)),
-        td(expense.voucher),
+        td(formatDate(expense.date), "", "Date"),
+        td(expense.voucher, "", "Voucher"),
         expenseItemsCell(expense.items),
-        td(money(sumItems(expense.items)), "number"),
+        td(money(sumItems(expense.items)), "number", "Total"),
         actionCell([
           ["Edit", () => editExpense(expense.id), "small-button"],
           ["Delete", () => deleteExpense(expense.id), "danger-button small-button"]
-        ])
+        ], "Action")
       );
       els.expenseTableBody.appendChild(row);
     });
@@ -490,14 +490,14 @@
     rows.forEach((income) => {
       const row = document.createElement("tr");
       row.append(
-        td(formatDate(income.date)),
-        td(money(income.cash), "number"),
-        td(money(income.upi), "number"),
-        td(income.note || "-"),
+        td(formatDate(income.date), "", "Date"),
+        td(money(income.cash), "number", "Cash"),
+        td(money(income.upi), "number", "UPI"),
+        td(income.note || "-", "", "Note"),
         actionCell([
           ["Edit", () => editIncome(income.id), "small-button"],
           ["Delete", () => deleteIncome(income.id), "danger-button small-button"]
-        ])
+        ], "Action")
       );
       els.incomeTableBody.appendChild(row);
     });
@@ -513,10 +513,10 @@
     report.dateRows.forEach((entry) => {
       const row = document.createElement("tr");
       row.append(
-        td(formatDate(entry.date)),
-        td(money(entry.totalExpense), "number"),
-        td(money(entry.totalIncome), "number"),
-        td(money(entry.totalBalance), "number")
+        td(formatDate(entry.date), "", "Date"),
+        td(money(entry.totalExpense), "number", "Total Expense"),
+        td(money(entry.totalIncome), "number", "Total Income"),
+        td(money(entry.totalBalance), "number", "Total Balance")
       );
       els.reportTableBody.appendChild(row);
     });
@@ -572,17 +572,17 @@
     rows.forEach((entry) => {
       const row = document.createElement("tr");
       row.append(
-        td(formatDate(entry.date)),
-        td(entry.voucher),
-        td(categoryLabels[entry.category] || entry.category),
-        td(money(entry.amount), "number")
+        td(formatDate(entry.date), "", "Date"),
+        td(entry.voucher, "", "Voucher"),
+        td(categoryLabels[entry.category] || entry.category, "", "Category"),
+        td(money(entry.amount), "number", "Amount")
       );
       els.voucherReportBody.appendChild(row);
     });
 
     if (!rows.length) {
       const row = document.createElement("tr");
-      const cell = td("No expense details found.");
+      const cell = td("No expense details found.", "", "Expense detail");
       cell.colSpan = 4;
       row.appendChild(cell);
       els.voucherReportBody.appendChild(row);
@@ -1006,9 +1006,10 @@
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   }
 
-  function td(content, className) {
+  function td(content, className, label) {
     const cell = document.createElement("td");
     if (className) cell.className = className;
+    if (label) cell.dataset.label = label;
     if (content instanceof Node) {
       cell.appendChild(content);
     } else {
@@ -1017,8 +1018,9 @@
     return cell;
   }
 
-  function actionCell(actions) {
+  function actionCell(actions, label) {
     const cell = document.createElement("td");
+    if (label) cell.dataset.label = label;
     const wrap = document.createElement("div");
     wrap.className = "row-actions";
     actions.forEach(([label, handler, className]) => {
@@ -1043,6 +1045,7 @@
 
   function expenseItemsCell(items) {
     const cell = document.createElement("td");
+    cell.dataset.label = "Items";
     items.forEach((item) => {
       const line = document.createElement("div");
       const pill = document.createElement("span");

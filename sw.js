@@ -1,4 +1,4 @@
-const CACHE_NAME = "fitora-accounts-v2";
+const CACHE_NAME = "fitora-accounts-v3";
 
 const APP_SHELL = [
   "./",
