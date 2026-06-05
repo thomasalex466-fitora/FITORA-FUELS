@@ -43,6 +43,10 @@
           <span>Total Expense</span>
           <strong id="metricExpense">Rs. 0.00</strong>
         </div>
+        <div class="metric metric-total">
+          <span>Total Balance</span>
+          <strong id="metricTotalBalance">Rs. 0.00</strong>
+        </div>
         <div class="metric">
           <span>Cash Balance</span>
           <strong id="metricCash">Rs. 0.00</strong>
@@ -70,8 +74,8 @@
                 <input id="expenseDate" type="date" required />
               </label>
               <label>
-                Voucher number
-                <input id="voucherNumber" type="text" placeholder="FV-001" required />
+                Auto voucher number
+                <input id="voucherNumber" type="text" placeholder="Auto generated" required readonly />
               </label>
             </div>
 
@@ -230,6 +234,7 @@
                   <th class="number">Income UPI</th>
                   <th class="number">Cash Balance</th>
                   <th class="number">UPI Balance</th>
+                  <th class="number">Total Balance</th>
                 </tr>
               </thead>
               <tbody id="reportTableBody"></tbody>
@@ -242,6 +247,7 @@
                   <th class="number" id="totalIncomeUpi">Rs. 0.00</th>
                   <th class="number" id="totalCashBalance">Rs. 0.00</th>
                   <th class="number" id="totalUpiBalance">Rs. 0.00</th>
+                  <th class="number" id="totalBalance">Rs. 0.00</th>
                 </tr>
               </tfoot>
             </table>
@@ -316,6 +322,10 @@
               <button class="secondary-button" id="downloadEmailFileBtn" type="button">Download email file</button>
               <button class="secondary-button" id="openMailBtn" type="button">Open email draft</button>
               <button class="secondary-button" id="importBackupBtn" type="button">Import backup</button>
+            </div>
+            <div class="mobile-note">
+              <strong>Mobile use</strong>
+              <span>Host this folder on an HTTPS website, then install it from Chrome on Android or Safari on iPhone using Add to Home Screen.</span>
             </div>
             <input id="importFileInput" class="visually-hidden" type="file" accept="application/json,.json" />
           </section>

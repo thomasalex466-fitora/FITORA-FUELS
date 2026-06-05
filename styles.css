@@ -138,7 +138,7 @@ main {
 
 .summary-strip {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 12px;
   margin-bottom: 18px;
 }
@@ -165,6 +165,15 @@ main {
   display: block;
   font-size: clamp(1.05rem, 2.1vw, 1.55rem);
   overflow-wrap: anywhere;
+}
+
+.metric-total {
+  border-color: rgba(185, 79, 52, 0.36);
+  background: var(--accent-soft);
+}
+
+.metric-total strong {
+  color: var(--accent);
 }
 
 .view {
@@ -247,6 +256,12 @@ select {
   min-width: 0;
   padding: 8px 10px;
   width: 100%;
+}
+
+input[readonly] {
+  background: #eef3f2;
+  color: var(--brand-dark);
+  font-weight: 800;
 }
 
 input:focus,
@@ -432,7 +447,7 @@ button:focus-visible {
 
 table {
   border-collapse: collapse;
-  min-width: 760px;
+  min-width: 860px;
   width: 100%;
 }
 
@@ -558,6 +573,21 @@ tfoot th {
 
 .tool-grid button {
   flex: 1 1 190px;
+}
+
+.mobile-note {
+  background: #f7f9f8;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--muted);
+  display: grid;
+  gap: 4px;
+  margin-top: 14px;
+  padding: 12px;
+}
+
+.mobile-note strong {
+  color: var(--brand-dark);
 }
 
 .toast {

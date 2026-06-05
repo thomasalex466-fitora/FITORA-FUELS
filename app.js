@@ -36,6 +36,7 @@
       views: Array.from(document.querySelectorAll(".view")),
       metricIncome: document.getElementById("metricIncome"),
       metricExpense: document.getElementById("metricExpense"),
+      metricTotalBalance: document.getElementById("metricTotalBalance"),
       metricCash: document.getElementById("metricCash"),
       metricUpi: document.getElementById("metricUpi"),
       installAppBtn: document.getElementById("installAppBtn"),
@@ -71,6 +72,7 @@
       totalIncomeUpi: document.getElementById("totalIncomeUpi"),
       totalCashBalance: document.getElementById("totalCashBalance"),
       totalUpiBalance: document.getElementById("totalUpiBalance"),
+      totalBalance: document.getElementById("totalBalance"),
       categoryBreakdown: document.getElementById("categoryBreakdown"),
       voucherReportBody: document.getElementById("voucherReportBody"),
       downloadReportBtn: document.getElementById("downloadReportBtn"),
@@ -96,6 +98,7 @@
     els.installAppBtn.addEventListener("click", installApp);
 
     els.expenseForm.addEventListener("submit", saveExpense);
+    els.expenseDate.addEventListener("change", refreshGeneratedVoucherNumber);
     els.addExpenseLineBtn.addEventListener("click", () => addExpenseLine());
     els.resetExpenseBtn.addEventListener("click", resetExpenseForm);
 
@@ -239,7 +242,7 @@
     event.preventDefault();
 
     const date = els.expenseDate.value;
-    const voucher = els.voucherNumber.value.trim();
+    const voucher = editingExpenseId ? els.voucherNumber.value.trim() : generateVoucherNumber(date);
     const paidBy = getCheckedValue("expensePaidBy");
     const items = readExpenseLines();
 
@@ -303,6 +306,7 @@
     editingExpenseId = null;
     els.expenseForm.reset();
     els.expenseDate.value = today();
+    refreshGeneratedVoucherNumber();
     els.expenseLines.innerHTML = "";
     addExpenseLine();
     els.saveExpenseBtn.textContent = "Save voucher";
@@ -321,6 +325,25 @@
     els.saveExpenseBtn.textContent = "Update voucher";
     switchTab("expense");
     showToast("Voucher ready for editing.");
+  }
+
+  function refreshGeneratedVoucherNumber() {
+    if (editingExpenseId) return;
+    els.voucherNumber.value = generateVoucherNumber(els.expenseDate.value || today());
+  }
+
+  function generateVoucherNumber(date) {
+    const voucherDate = normalizeDate(date) || today();
+    const datePart = voucherDate.replace(/-/g, "");
+    const prefix = `FV-${datePart}-`;
+    const nextNumber =
+      state.expenses
+        .filter((expense) => String(expense.voucher || "").startsWith(prefix))
+        .map((expense) => Number.parseInt(String(expense.voucher).slice(prefix.length), 10))
+        .filter((number) => Number.isFinite(number))
+        .reduce((max, number) => Math.max(max, number), 0) + 1;
+
+    return `${prefix}${String(nextNumber).padStart(3, "0")}`;
   }
 
   function deleteExpense(id) {
@@ -442,10 +465,11 @@
 
   function renderMetrics() {
     const totals = calculateTotals(state.expenses, state.incomes);
-    els.metricIncome.textContent = money(totals.incomeCash + totals.incomeUpi);
-    els.metricExpense.textContent = money(totals.expenseCash + totals.expenseUpi);
-    els.metricCash.textContent = money(totals.incomeCash - totals.expenseCash);
-    els.metricUpi.textContent = money(totals.incomeUpi - totals.expenseUpi);
+    els.metricIncome.textContent = money(totalIncome(totals));
+    els.metricExpense.textContent = money(totalExpense(totals));
+    els.metricTotalBalance.textContent = money(totalBalance(totals));
+    els.metricCash.textContent = money(cashBalance(totals));
+    els.metricUpi.textContent = money(upiBalance(totals));
   }
 
   function renderExpenseTable() {
@@ -506,8 +530,9 @@
         td(money(entry.expenseUpi), "number"),
         td(money(entry.incomeCash), "number"),
         td(money(entry.incomeUpi), "number"),
-        td(money(entry.incomeCash - entry.expenseCash), "number"),
-        td(money(entry.incomeUpi - entry.expenseUpi), "number")
+        td(money(entry.cashBalance), "number"),
+        td(money(entry.upiBalance), "number"),
+        td(money(entry.totalBalance), "number")
       );
       els.reportTableBody.appendChild(row);
     });
@@ -516,8 +541,9 @@
     els.totalExpenseUpi.textContent = money(report.totals.expenseUpi);
     els.totalIncomeCash.textContent = money(report.totals.incomeCash);
     els.totalIncomeUpi.textContent = money(report.totals.incomeUpi);
-    els.totalCashBalance.textContent = money(report.totals.incomeCash - report.totals.expenseCash);
-    els.totalUpiBalance.textContent = money(report.totals.incomeUpi - report.totals.expenseUpi);
+    els.totalCashBalance.textContent = money(cashBalance(report.totals));
+    els.totalUpiBalance.textContent = money(upiBalance(report.totals));
+    els.totalBalance.textContent = money(totalBalance(report.totals));
 
     renderCategoryBreakdown(report.categoryTotals);
     renderVoucherReport(report.voucherRows);
@@ -637,7 +663,10 @@
         expenseCash: roundMoney(entry.expenseCash),
         expenseUpi: roundMoney(entry.expenseUpi),
         incomeCash: roundMoney(entry.incomeCash),
-        incomeUpi: roundMoney(entry.incomeUpi)
+        incomeUpi: roundMoney(entry.incomeUpi),
+        cashBalance: roundMoney(entry.incomeCash - entry.expenseCash),
+        upiBalance: roundMoney(entry.incomeUpi - entry.expenseUpi),
+        totalBalance: roundMoney(entry.incomeCash + entry.incomeUpi - entry.expenseCash - entry.expenseUpi)
       }))
       .sort((a, b) => a.date.localeCompare(b.date));
 
@@ -677,6 +706,26 @@
     return totals;
   }
 
+  function totalIncome(totals) {
+    return roundMoney(totals.incomeCash + totals.incomeUpi);
+  }
+
+  function totalExpense(totals) {
+    return roundMoney(totals.expenseCash + totals.expenseUpi);
+  }
+
+  function cashBalance(totals) {
+    return roundMoney(totals.incomeCash - totals.expenseCash);
+  }
+
+  function upiBalance(totals) {
+    return roundMoney(totals.incomeUpi - totals.expenseUpi);
+  }
+
+  function totalBalance(totals) {
+    return roundMoney(totalIncome(totals) - totalExpense(totals));
+  }
+
   function clearReportFilters() {
     els.reportFrom.value = "";
     els.reportTo.value = "";
@@ -703,7 +752,8 @@
       "Income Cash",
       "Income UPI",
       "Cash Balance",
-      "UPI Balance"
+      "UPI Balance",
+      "Total Balance"
     ]);
     report.dateRows.forEach((entry) => {
       lines.push([
@@ -712,8 +762,9 @@
         entry.expenseUpi,
         entry.incomeCash,
         entry.incomeUpi,
-        roundMoney(entry.incomeCash - entry.expenseCash),
-        roundMoney(entry.incomeUpi - entry.expenseUpi)
+        entry.cashBalance,
+        entry.upiBalance,
+        entry.totalBalance
       ]);
     });
     lines.push([
@@ -722,8 +773,9 @@
       report.totals.expenseUpi,
       report.totals.incomeCash,
       report.totals.incomeUpi,
-      roundMoney(report.totals.incomeCash - report.totals.expenseCash),
-      roundMoney(report.totals.incomeUpi - report.totals.expenseUpi)
+      cashBalance(report.totals),
+      upiBalance(report.totals),
+      totalBalance(report.totals)
     ]);
 
     lines.push([]);
